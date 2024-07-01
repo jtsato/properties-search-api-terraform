@@ -1,90 +1,26 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"os"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
-	"time"
 
-	"github.com/joho/godotenv"
-	"github.com/meilisearch/meilisearch-go"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client
-var collection *mongo.Collection
-var documents []bson.M
-
-func main() {
-	// Load environment variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	execute()
-}
-
-func execute() {
-	log.Println("--------------------------------------------------------------")
-	log.Println("Starting...")
-
-	start := time.Now()
-	count := 0
-
-	log.Printf("The log level defined to %s", os.Getenv("LOG_LEVEL"))
-
-	connectToDatabase()
-	defer disconnect()
-
-	database := client.Database(os.Getenv("MONGODB_DATABASE"))
-	collection = database.Collection("properties")
-
-	cursor, err := collection.Find(context.TODO(), bson.M{"tenantId": 1})
-	if err != nil {
-		log.Fatalf("Error finding documents: %v", err)
-	}
-	defer cursor.Close(context.TODO())
-
-	if err = cursor.All(context.TODO(), &documents); err != nil {
-		log.Fatalf("Error decoding documents: %v", err)
-	}
-
-	var properties []interface{}
-	for _, document := range documents {
-		count++
-		properties = append(properties, convertProperty(document))
-	}
-
-	meiliClient := meilisearch.NewClient(meilisearch.ClientConfig{
-		Host:   os.Getenv("MEILISEARCH_HOST"),
-		APIKey: os.Getenv("MEILISEARCH_MANAGE_PROPERTIES_TOKEN"),
-	})
-
-	_, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
-	if err != nil {
-		log.Fatalf("Error adding documents to MeiliSearch: %v", err)
-	}
-
-	_, err = meiliClient.CreateIndex(&meilisearch.IndexConfig{
-		Uid:        "properties",
-		PrimaryKey: "uuid",
-	})
-	if err != nil {
-		log.Fatalf("Error creating index in MeiliSearch: %v", err)
-	}
-
-	duration := time.Since(start)
-	log.Printf("The system processed %d properties in %.2f seconds", count, duration.Seconds())
-
-	log.Println("Finished")
-}
-
 func convertProperty(document bson.M) map[string]interface{} {
+
+	fmt.Println("Converting property:", document["uuid"])
+	coverImage := ""
+
+	if document["images"] != nil {
+		// panic: interface conversion: interface {} is primitive.A, not []interface {}
+		images := document["images"].(primitive.A)
+		if len(images) > 0 {
+			coverImage = images[0].(string)
+		}
+	}
+
 	return map[string]interface{}{
 		"transactionText":       getTransactionText(document["transaction"].(string)),
 		"typeText":              getTypeText(document["type"].(string)),
@@ -113,7 +49,7 @@ func convertProperty(document bson.M) map[string]interface{} {
 		"status":                document["status"],
 		"transaction":           document["transaction"],
 		"type":                  document["type"],
-		"coverImage":            document["images"].([]interface{})[0],
+		"coverImage":            coverImage,
 		"uuid":                  document["uuid"],
 	}
 }
@@ -220,60 +156,4 @@ func convertNumberToPortugueseWords(number int) string {
 	}
 
 	return fmt.Sprintf("%d", number)
-}
-
-func connectToDatabase() {
-	mongoUser := os.Getenv("MONGODB_USER")
-	mongoPassword := os.Getenv("MONGODB_PASSWORD")
-	mongoClusterUrl := os.Getenv("MONGODB_URL")
-	mongoDatabase := os.Getenv("MONGODB_DATABASE")
-
-	if mongoUser == "" || mongoPassword == "" || mongoClusterUrl == "" || mongoDatabase == "" {
-		log.Fatalf("Missing environment variables for MongoDB")
-	}
-
-	uri := fmt.Sprintf("mongodb+srv://%s:%s@%s/%s?retryWrites=true&w=majority", mongoUser, mongoPassword, mongoClusterUrl, mongoDatabase)
-
-	var err error
-	client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if err != nil {
-		log.Fatalf("Error connecting to MongoDB: %v", err)
-	}
-
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatalf("Error pinging MongoDB: %v", err)
-	}
-
-	log.Println("Connected to MongoDB")
-}
-
-func disconnect() {
-	if client != nil {
-		if err := client.Disconnect(context.TODO()); err != nil {
-			log.Fatalf("Error disconnecting from MongoDB: %v", err)
-		}
-	}
-
-	log.Println("Disconnected from MongoDB")
-}
-
-func info(message string) {
-	if os.Getenv("LOG_LEVEL") == "DEBUG" || os.Getenv("LOG_LEVEL") == "INFO" {
-		log.Printf("Hestia %s: %s", formatDate(time.Now()), message)
-	}
-}
-
-func error(message string) {
-	log.Printf("Hestia %s", message)
-}
-
-func padTo2Digits(num int) string {
-	return fmt.Sprintf("%02d", num)
-}
-
-func formatDate(date time.Time) string {
-	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d",
-		date.Year(), date.Month(), date.Day(),
-		date.Hour(), date.Minute(), date.Second(), date.Nanosecond()/1e6)
 }

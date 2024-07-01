@@ -8,11 +8,10 @@ import (
 	"os"
 )
 
-func SetupAttributes() {
-	// Get the URL from the environment variable
-	url := os.Getenv("URL")
+func setupAttributes() {
+	host := os.Getenv("MEILISEARCH_HOST")
+	url := fmt.Sprintf("%s/indexes/properties/settings", host)
 
-	// Define the payload
 	payload := map[string]interface{}{
 		"filterableAttributes": []string{
 			"transactionText",
@@ -35,24 +34,21 @@ func SetupAttributes() {
 		},
 	}
 
-	// Marshal the payload into JSON
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
 		return
 	}
 
-	// Create a new HTTP request
 	req, err := http.NewRequest("PATCH", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return
 	}
 
-	// Set the Content-Type header
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("MEILISEARCH_MANAGE_PROPERTIES_TOKEN"))
 
-	// Send the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -61,6 +57,5 @@ func SetupAttributes() {
 	}
 	defer resp.Body.Close()
 
-	// Print the response status
 	fmt.Println("Response Status:", resp.Status)
 }
