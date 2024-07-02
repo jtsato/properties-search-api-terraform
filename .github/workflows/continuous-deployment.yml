@@ -96,6 +96,7 @@ jobs:
           terraform apply -auto-approve tfplan.out
 
   build-and-run:
+    needs: deploy-infrastructure
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
