@@ -14,37 +14,37 @@ resource "google_cloud_run_service" "default" {
       service_account_name = var.service_name
 
       containers {
-            image = var.image_url
+        image = var.image_url
 
-            ports {
-            container_port = 7700
-            }
-
-            env {
-            name  = "MEILI_HOST"
-            value = var.meili_host
-            }
-
-            env {
-            name  = "MEILI_MASTER_KEY"
-            value = var.meili_master_key
-            }
-
-            env {
-            name  = "MEILI_NO_ANALYTICS"
-            value = var.meili_no_analytics
-            }
-
-            env {
-            name  = "MEILI_ENV"
-            value = var.meili_env
-            }
-
-            env {
-            name  = "TZ"
-            value = var.tz
-            }
+        ports {
+          container_port = 7700
         }
+
+        env {
+          name  = "MEILI_HOST"
+          value = var.meili_host
+        }
+
+        env {
+          name  = "MEILI_MANAGE_PROPERTIES_TOKEN"
+          value = var.meili_manage_properties_token
+        }
+
+        env {
+          name  = "MEILI_NO_ANALYTICS"
+          value = var.meili_no_analytics
+        }
+
+        env {
+          name  = "MEILI_ENV"
+          value = var.meili_env
+        }
+
+        env {
+          name  = "TZ"
+          value = var.tz
+        }
+      }
     }
 
     metadata {

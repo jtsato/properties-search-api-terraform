@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -11,6 +12,7 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// setupAttributes()
+	setupAttributes()
+
 	execute()
 }

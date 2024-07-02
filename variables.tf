@@ -24,23 +24,23 @@ variable "image_url" {
 }
 
 variable "meili_host" {
-    description = "Server Hostname."
-    type        = string
+  description = "Server Hostname."
+  type        = string
 }
 
-variable "meili_master_key" {
-    description = "Master key."
-    type        = string
+variable "meili_manage_properties_token" {
+  description = "Master key."
+  type        = string
 }
 
 variable "meili_no_analytics" {
-    description = "Disable analytics."
-    type        = string
+  description = "Disable analytics."
+  type        = string
 }
 
 variable "meili_env" {
-    description = "Environment."
-    type        = string
+  description = "Environment."
+  type        = string
 }
 
 variable "tz" {

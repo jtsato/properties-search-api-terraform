@@ -1,9 +1,6 @@
 # properties-search-api-terraform
 Properties Search API IaC project.
 
-## Production Version:
-* Properties Search API: <!-- pps-prd-start -->v1.0.0-00000000<!-- pps-prd-end -->
-
 ## Technology stack
 
 ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?logo=terraform&logoColor=white)
@@ -26,7 +23,7 @@ Properties Search API IaC project.
 ***
 
 ## TODO:
-* [ ] CI Pipeline (Build Go Binary Files)
-* [ ] CD Pipeline (Terraform Apply on GCP)
-* [ ] Setup Secrets in GitHub Secrets
+* [X] CI Pipeline (Build Go Binary Files)
+* [X] CD Pipeline (Terraform Apply on GCP)
+* [X] Setup Secrets in GitHub Secrets
 * [ ] Setup Meilisearch Volume in GCS (Google Cloud Storage)

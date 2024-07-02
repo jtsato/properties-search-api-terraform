@@ -9,7 +9,7 @@ import (
 )
 
 func setupAttributes() {
-	host := os.Getenv("MEILISEARCH_HOST")
+	host := os.Getenv("MEILI_HOST")
 	url := fmt.Sprintf("%s/indexes/properties/settings", host)
 
 	payload := map[string]interface{}{
@@ -47,7 +47,7 @@ func setupAttributes() {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("MEILISEARCH_MANAGE_PROPERTIES_TOKEN"))
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("MEILI_MANAGE_PROPERTIES_TOKEN"))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

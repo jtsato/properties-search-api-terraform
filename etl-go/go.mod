@@ -1,4 +1,4 @@
-module github.com/jtsato/properties-search
+module github.com/jtsato/etl-go
 
 go 1.22.4
 

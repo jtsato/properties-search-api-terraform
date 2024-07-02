@@ -47,8 +47,8 @@ func execute() {
 	}
 
 	meiliClient := meilisearch.NewClient(meilisearch.ClientConfig{
-		Host:   os.Getenv("MEILISEARCH_HOST"),
-		APIKey: os.Getenv("MEILISEARCH_MANAGE_PROPERTIES_TOKEN"),
+		Host:   os.Getenv("MEILI_HOST"),
+		APIKey: os.Getenv("MEILI_MANAGE_PROPERTIES_TOKEN"),
 	})
 
 	_, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
