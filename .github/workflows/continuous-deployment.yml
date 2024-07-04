@@ -115,4 +115,3 @@ jobs:
       mongodb_database: ${{ secrets.MONGODB_DATABASE }}
       mongodb_user: ${{ secrets.MONGODB_USER }}
       mongodb_password: ${{ secrets.MONGODB_PASSWORD }}
-      log_level: ${{ vars.LOG_LEVEL }}

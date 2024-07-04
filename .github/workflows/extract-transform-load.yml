@@ -15,8 +15,6 @@ on:
         required: true
       mongodb_password:
         required: true
-      log_level:
-        required: true
     
 jobs:
   build-and-run:
@@ -41,7 +39,6 @@ jobs:
           echo "MONGODB_DATABASE=${{ secrets.mongodb_database }}" >> .env
           echo "MONGODB_USER=${{ secrets.mongodb_user }}" >> .env
           echo "MONGODB_PASSWORD=${{ secrets.mongodb_password }}" >> .env
-          echo "LOG_LEVEL=${{ secrets.log_level }}" >> .env
 
       - name: Call Runner Script
         working-directory: ./etl-go
