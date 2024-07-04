@@ -48,12 +48,8 @@ func execute() {
 
 	log.Printf("The system found %d properties", count)
 
-	if os.Getenv("MEILISEARCH_HOST") == "" {
-		log.Fatal("The environment variable MEILISEARCH_HOST is required")
-	}
-
-	if os.Getenv("MEILISEARCH_MASTER_KEY") == "" {
-		log.Fatal("The environment variable MEILISEARCH_MASTER_KEY is required")
+	if os.Getenv("MEILISEARCH_HOST") == "" || os.Getenv("MEILISEARCH_MASTER_KEY") == "" {
+		log.Fatal("Missing environment variables for MeiliSearch")
 	}
 
 	meiliClient := meilisearch.NewClient(meilisearch.ClientConfig{
