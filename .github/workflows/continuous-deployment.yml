@@ -94,6 +94,17 @@ jobs:
         run: |
           terraform apply -auto-approve tfplan.out
 
+      - name: Wait for the service to be ready
+        shell: bash
+        run: |
+          timeout 30 bash -c '
+          until curl -f -s ${{ secrets.MEILISEARCH_HOST }}/health  > /dev/null; do
+            echo "Waiting for the service to be ready..."
+            sleep 1
+          done
+            echo "It is alive!"
+          '
+
   etl-go:
     needs: deploy-infrastructure
     uses: ./.github/workflows/extract-transform-load.yml
