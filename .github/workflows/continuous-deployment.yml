@@ -122,7 +122,7 @@ jobs:
       - name: Call Runner Script
         working-directory: ./etl-go
         run: |
-          dos2unix runner.sh
+          sed -i 's/\r//' runner.sh
           sudo chmod +x runner.sh
           ./runner.sh
 
