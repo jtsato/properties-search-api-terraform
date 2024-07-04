@@ -97,3 +97,11 @@ jobs:
   extract-transform-load:
     needs: deploy-infrastructure
     uses: ./.github/workflows/extract-transform-load.yml
+    secrets:
+      meilisearch_host: ${{ secrets.MEILISEARCH_HOST }}
+      meilisearch_master_key: ${{ secrets.MEILISEARCH_MASTER_KEY }}
+      mongodb_url: ${{ secrets.MONGODB_URL }}
+      mongodb_database: ${{ secrets.MONGODB_DATABASE }}
+      mongodb_user: ${{ secrets.MONGODB_USER }}
+      mongodb_password: ${{ secrets.MONGODB_PASSWORD }}
+      log_level: ${{ secrets.LOG_LEVEL }}
