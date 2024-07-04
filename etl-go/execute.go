@@ -2,22 +2,17 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/meilisearch/meilisearch-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func execute() {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
 
 	log.Println("--------------------------------------------------------------")
 	log.Println("Starting...")
@@ -64,12 +59,27 @@ func execute() {
 	})
 	meiliClient.GetKeys(nil)
 
-	_, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
+	task, err := meiliClient.Index("properties").DeleteAllDocuments()
+	if err != nil {
+		log.Fatalf("Error deleting documents from MeiliSearch: %v", err)
+	}
+
+	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
+	if err != nil {
+		log.Fatalf("Error waiting for deleting documents: %v", err)
+	}
+
+	task, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
 	if err != nil {
 		log.Fatalf("Error adding documents to MeiliSearch: %v", err)
 	}
 
-	_, err = meiliClient.CreateIndex(&meilisearch.IndexConfig{
+	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
+	if err != nil {
+		log.Fatalf("Error waiting for adding documents: %v", err)
+	}
+
+	task, err = meiliClient.CreateIndex(&meilisearch.IndexConfig{
 		Uid:        "properties",
 		PrimaryKey: "uuid",
 	})
@@ -77,8 +87,39 @@ func execute() {
 		log.Fatalf("Error creating index in MeiliSearch: %v", err)
 	}
 
+	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
+	if err != nil {
+		log.Fatalf("Error waiting for creating index: %v", err)
+	}
+
 	duration := time.Since(start)
 	log.Printf("The system processed %d properties in %.2f seconds", count, duration.Seconds())
 
 	log.Println("Finished")
+}
+
+func waitForTaskCompletion(client *meilisearch.Client, taskID int64, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	for {
+		task, err := client.GetTask(taskID)
+		if err != nil {
+			return fmt.Errorf("error getting task status: %v", err)
+		}
+
+		if task.Status == "succeeded" {
+			return nil
+		}
+
+		if task.Status == "failed" {
+			return fmt.Errorf("task failed: %v", task)
+		}
+
+		select {
+		case <-time.After(500 * time.Millisecond):
+		case <-ctx.Done():
+			return fmt.Errorf("timeout waiting for task completion")
+		}
+	}
 }
