@@ -94,6 +94,6 @@ jobs:
         run: |
           terraform apply -auto-approve tfplan.out
 
-  build-and-run:
+  extract-transform-load:
     needs: deploy-infrastructure
     uses: ./.github/workflows/extract-transform-load.yml

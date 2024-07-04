@@ -3,6 +3,21 @@ name: Extract, Transform, and Load
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      meilisearch_host:
+        required: true
+      meilisearch_master_key:
+        required: true
+      mongodb_url:
+        required: true
+      mongodb_database:
+        required: true
+      mongodb_user:
+        required: true
+      mongodb_password:
+        required: true
+      log_level:
+        required: true
     
 jobs:
   build-and-run:
@@ -21,13 +36,13 @@ jobs:
       - name: Set Environment Variables from GitHub Secrets
         working-directory: ./etl-go
         run: |
-          echo "MEILISEARCH_HOST=${{ secrets.MEILISEARCH_HOST }}" > .env
-          echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> .env
-          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
-          echo "MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}" >> .env
-          echo "MONGODB_USER=${{ secrets.MONGODB_USER }}" >> .env
-          echo "MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}" >> .env
-          echo "LOG_LEVEL=${{ vars.LOG_LEVEL }}" >> .env
+          echo "MEILISEARCH_HOST=${{ secrets.meilisearch_host }}" > .env
+          echo "MEILISEARCH_MASTER_KEY=${{ secrets.meilisearch_master_key }}" >> .env
+          echo "MONGODB_URL=${{ secrets.mongodb_url }}" >> .env
+          echo "MONGODB_DATABASE=${{ secrets.mongodb_database }}" >> .env
+          echo "MONGODB_USER=${{ secrets.mongodb_user }}" >> .env
+          echo "MONGODB_PASSWORD=${{ secrets.mongodb_password }}" >> .env
+          echo "LOG_LEVEL=${{ secrets.log_level }}" >> .env
 
       - name: Call Runner Script
         working-directory: ./etl-go
