@@ -97,12 +97,12 @@ func execute() {
 	log.Println("Finished")
 }
 
-func waitForTaskCompletion(client *meilisearch.Client, taskID int64, timeout time.Duration) error {
+func waitForTaskCompletion(meiliClient *meilisearch.Client, taskID int64, timeout time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	for {
-		task, err := client.GetTask(taskID)
+		task, err := meiliClient.GetTask(taskID)
 		if err != nil {
 			return fmt.Errorf("error getting task status: %v", err)
 		}
