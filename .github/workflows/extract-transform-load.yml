@@ -1,7 +1,6 @@
 name: Extract, Transform, and Load
 
 on:
-  workflow_dispatch:
   workflow_call:
     secrets:
       meilisearch_host:
