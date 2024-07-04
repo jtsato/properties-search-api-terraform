@@ -1,0 +1,64 @@
+name: Extract, Transform, and Load
+
+on:
+  workflow_call:
+    
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.0.0
+        with:
+          check-latest: true
+          cache: true
+          go-version: 1.22.2
+      
+      - name: Set Environment Variables from GitHub Secrets
+        working-directory: ./etl-go
+        run: |
+          echo "MEILISEARCH_HOST=${{ secrets.MEILISEARCH_HOST }}" > .env
+          echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> .env
+          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
+          echo "MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}" >> .env
+          echo "MONGODB_USER=${{ secrets.MONGODB_USER }}" >> .env
+          echo "MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}" >> .env
+          echo "LOG_LEVEL=${{ vars.LOG_LEVEL }}" >> .env
+
+      - name: Call Runner Script
+        working-directory: ./etl-go
+        run: |
+          sed -i 's/\r//' runner.sh
+          sudo chmod +x runner.sh
+          ./runner.sh
+
+      - name: Check for changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "SHOULD_I_COMMIT=Yes" >> $GITHUB_ENV
+          else
+            echo "SHOULD_I_COMMIT=No" >> $GITHUB_ENV
+          fi
+  
+      - name: Commit the changes
+        if: ${{ env.SHOULD_I_COMMIT == 'Yes' }}
+        run: |
+          git config advice.ignoredHook false
+          git config pull.rebase false
+          git config --local user.email "action@github.com"
+          git config --local user.name "Continuous Deployment"
+          git add -A
+          git commit -m "cd(etl-go): persist the etl-go program"
+          git pull origin main
+
+      - name: Push the changes
+        if: ${{ env.SHOULD_I_COMMIT == 'Yes' }}
+        uses: ad-m/github-push-action@master
+        with:
+          # To push to a protected branch, it is essential to utilize a personal access token.
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          branch: main
+          force_with_lease: true
