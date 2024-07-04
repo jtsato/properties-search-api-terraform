@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# Build etl-runner program if doesn't exist
-if [[ ! -f "./etl-runner" ]]; then
-  echo "Building etl-runner program"
+# Build etl-go program if doesn't exist
+if [[ ! -f "./etl-go" ]]; then
+  echo "Building etl-go program"
   go build
-  echo "etl-runner already built. Skipping build"
+else
+  echo "Skipping build because etl-go program already exists"
 fi
 
-# Run etl-runner program
-./etl-runner
+# Run etl-go program
+./etl-go
