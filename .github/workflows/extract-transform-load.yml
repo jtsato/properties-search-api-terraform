@@ -15,16 +15,9 @@ on:
         required: true
       mongodb_password:
         required: true
+      personal_access_token:
+        required: true
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-        
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
@@ -34,7 +27,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.personal_access_token }}
           persist-credentials: true
 
       - name: Setup Go environment
@@ -85,6 +78,6 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           # To push to a protected branch, it is essential to utilize a personal access token.
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_token: ${{ secrets.personal_access_token }}
           branch: main
           force_with_lease: true
