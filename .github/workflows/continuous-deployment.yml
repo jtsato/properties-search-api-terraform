@@ -108,10 +108,8 @@ jobs:
           cache: true
           go-version: 1.22.2
       
-      - name: Go to ETL folder
-        run: cd etl-go
-
       - name: Set Environment Variables from GitHub Secrets
+        working-directory: etl-go
         run: |
           echo "MEILISEARCH_HOST=${{ secrets.MEILISEARCH_HOST }}" > .env
           echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> .env
@@ -122,6 +120,7 @@ jobs:
           echo "LOG_LEVEL=${{ vars.LOG_LEVEL }}" >> .env
 
       - name: Call Runner Script
+        working-directory: etl-go
         run: |
           sudo chmod +x runner.sh
           ./runner.sh
