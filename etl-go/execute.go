@@ -58,7 +58,7 @@ func execute() {
 		APIKey: os.Getenv("MEILISEARCH_MASTER_KEY"),
 	})
 
-	task, err := meiliClient.Index("properties").DeleteAllDocuments()
+	task, err := meiliClient.DeleteIndex("properties")
 	if err != nil {
 		log.Fatalf("Error deleting documents from MeiliSearch: %v", err)
 	}
@@ -66,16 +66,6 @@ func execute() {
 	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
 	if err != nil {
 		log.Fatalf("Error waiting for deleting documents: %v", err)
-	}
-
-	task, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
-	if err != nil {
-		log.Fatalf("Error adding documents to MeiliSearch: %v", err)
-	}
-
-	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
-	if err != nil {
-		log.Fatalf("Error waiting for adding documents: %v", err)
 	}
 
 	task, err = meiliClient.CreateIndex(&meilisearch.IndexConfig{
@@ -89,6 +79,16 @@ func execute() {
 	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
 	if err != nil {
 		log.Fatalf("Error waiting for creating index: %v", err)
+	}
+
+	task, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
+	if err != nil {
+		log.Fatalf("Error adding documents to MeiliSearch: %v", err)
+	}
+
+	err = waitForTaskCompletion(meiliClient, task.TaskUID, 3*time.Second)
+	if err != nil {
+		log.Fatalf("Error waiting for adding documents: %v", err)
 	}
 
 	duration := time.Since(start)
