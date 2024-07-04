@@ -124,6 +124,7 @@ jobs:
         run: |
           sed -i 's/\r//' runner.sh
           sudo chmod +x runner.sh
+          sudo chmod +x etl-go
           ./runner.sh
 
       - name: Check for changes
