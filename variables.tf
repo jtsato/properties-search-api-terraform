@@ -23,7 +23,7 @@ variable "image_url" {
   type        = string
 }
 
-variable "meili_host" {
+variable "meilisearch_host" {
   description = "Server Hostname."
   type        = string
 }
@@ -33,12 +33,12 @@ variable "meilisearch_master_key" {
   type        = string
 }
 
-variable "meili_no_analytics" {
+variable "meilisearch_no_analytics" {
   description = "Disable analytics."
   type        = string
 }
 
-variable "meili_env" {
+variable "meilisearch_env" {
   description = "Environment."
   type        = string
 }

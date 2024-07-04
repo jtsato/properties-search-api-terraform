@@ -21,18 +21,18 @@ resource "google_cloud_run_service" "default" {
         }
 
         env {
-          name  = "MEILISEARCH_MASTER_KEY"
+          name  = "MEILI_MASTER_KEY"
           value = var.meilisearch_master_key
         }
 
         env {
           name  = "MEILI_NO_ANALYTICS"
-          value = var.meili_no_analytics
+          value = var.meilisearch_no_analytics
         }
 
         env {
           name  = "MEILI_ENV"
-          value = var.meili_env
+          value = var.meilisearch_env
         }
 
         env {

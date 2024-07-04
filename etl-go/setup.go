@@ -9,7 +9,7 @@ import (
 )
 
 func setupAttributes() {
-	host := os.Getenv("MEILI_HOST")
+	host := os.Getenv("MEILISEARCH_HOST")
 	url := fmt.Sprintf("%s/indexes/properties/settings", host)
 
 	payload := map[string]interface{}{

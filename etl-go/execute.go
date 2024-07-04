@@ -47,7 +47,7 @@ func execute() {
 	}
 
 	meiliClient := meilisearch.NewClient(meilisearch.ClientConfig{
-		Host:   os.Getenv("MEILI_HOST"),
+		Host:   os.Getenv("MEILISEARCH_HOST"),
 		APIKey: os.Getenv("MEILISEARCH_MASTER_KEY"),
 	})
 

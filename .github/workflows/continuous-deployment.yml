@@ -30,8 +30,8 @@ jobs:
           echo "TF_VAR_SERVICE_NAME=${{ vars.SERVICE_NAME }}" >> $GITHUB_ENV
           echo "TF_VAR_IMAGE_URL=${{ vars.IMAGE_URL }}" >> $GITHUB_ENV
           echo "TF_VAR_MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> $GITHUB_ENV
-          echo "TF_VAR_MEILI_NO_ANALYTICS=${{ secrets.MEILI_NO_ANALYTICS }}" >> $GITHUB_ENV
-          echo "TF_VAR_MEILI_ENV=${{ secrets.MEILI_ENV }}" >> $GITHUB_ENV
+          echo "TF_VAR_MEILISEARCH_NO_ANALYTICS=${{ secrets.MEILISEARCH_NO_ANALYTICS }}" >> $GITHUB_ENV
+          echo "TF_VAR_MEILISEARCH_ENV=${{ secrets.MEILISEARCH_ENV }}" >> $GITHUB_ENV
           echo "TF_VAR_TZ=${{ vars.TZ }}" >> $GITHUB_ENV
 
       - name: Terraform Version
@@ -57,10 +57,10 @@ jobs:
           echo "zone=\"$TF_VAR_ZONE\"" >> secrets.tfvars
           echo "service_name=\"$TF_VAR_SERVICE_NAME\"" >> secrets.tfvars
           echo "image_url=\"$TF_VAR_IMAGE_URL\"" >> secrets.tfvars
-          echo "meili_host=\"$TF_VAR_MEILI_HOST\"" >> secrets.tfvars
+          echo "meilisearch_host=\"$TF_VAR_MEILISEARCH_HOST\"" >> secrets.tfvars
           echo "meilisearch_master_key=\"$TF_VAR_MEILISEARCH_MASTER_KEY\"" >> secrets.tfvars
-          echo "meili_no_analytics=\"$TF_VAR_MEILI_NO_ANALYTICS\"" >> secrets.tfvars
-          echo "meili_env=\"$TF_VAR_MEILI_ENV\"" >> secrets.tfvars
+          echo "meilisearch_no_analytics=\"$TF_VAR_MEILISEARCH_NO_ANALYTICS\"" >> secrets.tfvars
+          echo "meilisearch_env=\"$TF_VAR_MEILISEARCH_ENV\"" >> secrets.tfvars
           echo "tz=\"$TF_VAR_TZ\"" >> secrets.tfvars
 
       - name: Terraform Destroy
@@ -113,7 +113,7 @@ jobs:
 
       - name: Set Environment Variables from GitHub Secrets
         run: |
-          echo "MEILI_HOST=${{ secrets.MEILI_HOST }}" > .env
+          echo "MEILISEARCH_HOST=${{ secrets.MEILISEARCH_HOST }}" > .env
           echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> .env
           echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
           echo "MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}" >> .env
