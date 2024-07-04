@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func convertProperty(document bson.M) map[string]interface{} {
 
-	fmt.Println("Converting property:", document["uuid"])
 	coverImage := ""
 
 	if document["images"] != nil {

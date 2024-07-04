@@ -46,10 +46,13 @@ func execute() {
 		properties = append(properties, convertProperty(document))
 	}
 
+	log.Printf("The system found %d properties", count)
+
 	meiliClient := meilisearch.NewClient(meilisearch.ClientConfig{
 		Host:   os.Getenv("MEILISEARCH_HOST"),
 		APIKey: os.Getenv("MEILISEARCH_MASTER_KEY"),
 	})
+	meiliClient.GetKeys(nil)
 
 	_, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")
 	if err != nil {
