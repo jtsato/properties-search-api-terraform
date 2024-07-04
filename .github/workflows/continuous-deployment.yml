@@ -11,6 +11,7 @@ on:
 
 jobs:
   deploy-infrastructure:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -95,7 +96,7 @@ jobs:
           terraform apply -auto-approve tfplan.out
 
   build-and-run:
-    needs: deploy-infrastructure
+    # needs: deploy-infrastructure
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -123,7 +124,6 @@ jobs:
         working-directory: ./etl-go
         run: |
           sudo chmod +x runner.sh
-          sudo chmod +x etl-go
           ./runner.sh
 
       - name: Check for changes
