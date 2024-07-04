@@ -57,7 +57,6 @@ func execute() {
 		Host:   os.Getenv("MEILISEARCH_HOST"),
 		APIKey: os.Getenv("MEILISEARCH_MASTER_KEY"),
 	})
-	meiliClient.GetKeys(nil)
 
 	task, err := meiliClient.Index("properties").DeleteAllDocuments()
 	if err != nil {
