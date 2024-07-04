@@ -94,7 +94,7 @@ jobs:
         run: |
           terraform apply -auto-approve tfplan.out
 
-  extract-transform-load:
+  etl-go:
     needs: deploy-infrastructure
     uses: ./.github/workflows/extract-transform-load.yml
     secrets:
