@@ -47,7 +47,7 @@ func setupAttributes() {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("MEILI_MANAGE_PROPERTIES_TOKEN"))
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("MEILISEARCH_MASTER_KEY"))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

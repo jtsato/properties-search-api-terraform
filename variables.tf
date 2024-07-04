@@ -28,7 +28,7 @@ variable "meili_host" {
   type        = string
 }
 
-variable "meili_manage_properties_token" {
+variable "meilisearch_master_key" {
   description = "Master key."
   type        = string
 }
