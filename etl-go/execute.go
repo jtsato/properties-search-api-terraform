@@ -6,12 +6,18 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/meilisearch/meilisearch-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func execute() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
 
 	log.Println("--------------------------------------------------------------")
 	log.Println("Starting...")

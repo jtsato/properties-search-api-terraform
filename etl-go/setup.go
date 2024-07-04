@@ -4,11 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
-func setupAttributes() {
+func setupFiltersAndSort() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	host := os.Getenv("MEILISEARCH_HOST")
 	url := fmt.Sprintf("%s/indexes/properties/settings", host)
 
