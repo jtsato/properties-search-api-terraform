@@ -17,6 +17,13 @@ resource "google_cloud_run_v2_service" "default" {
         container_port = 7700
       }
 
+      resources {
+        limits = {
+          memory = "1024Mi"
+          cpu    = "2"
+        }
+      }
+
       env {
         name  = "MEILI_MASTER_KEY"
         value = var.meilisearch_master_key
