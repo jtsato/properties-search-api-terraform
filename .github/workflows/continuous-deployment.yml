@@ -9,6 +9,10 @@ on:
       - "main"
   workflow_dispatch:
 
+concurrency:
+  group: "continuous-deployment"
+  cancel-in-progress: false
+
 jobs:
   deploy-infrastructure:
     runs-on: ubuntu-latest

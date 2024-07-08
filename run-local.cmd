@@ -1,5 +1,7 @@
 @echo on
 
+terraform validate
+
 terraform plan -destroy
 
 terraform destroy -auto-approve -var-file=secrets.tfvars
