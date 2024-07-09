@@ -43,6 +43,11 @@ variable "meilisearch_env" {
   type        = string
 }
 
+variable "bucket_name" {
+  description = "Bucket name."
+  type        = string
+}
+
 variable "tz" {
   description = "Timezone."
   type        = string

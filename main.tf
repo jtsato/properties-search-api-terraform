@@ -28,20 +28,29 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "MEILI_MASTER_KEY"
         value = var.meilisearch_master_key
       }
-
       env {
         name  = "MEILI_NO_ANALYTICS"
         value = var.meilisearch_no_analytics
       }
-
       env {
         name  = "MEILI_ENV"
         value = var.meilisearch_env
       }
-
+      env {
+        name  = "BUCKET_NAME"
+        value = var.bucket_name
+      }
+      env {
+        name  = "MEILI_DB_PATH"
+        value = "gs://${var.bucket_name}/data.ms"
+      }
       env {
         name  = "TZ"
         value = var.tz
+      }
+      volume_mounts {
+        name       = "meili_data"
+        mount_path = "/data.ms"
       }
     }
 
@@ -100,6 +109,27 @@ resource "google_cloud_run_v2_service_iam_policy" "noauth" {
   name     = google_cloud_run_v2_service.default.name
 
   policy_data = data.google_iam_policy.noauth.policy_data
+}
+
+resource "google_storage_bucket" "storage_bucket" {
+  name     = var.bucket_name
+  location = google_cloud_run_v2_service.default.location
+  project  = var.project_id
+}
+
+data "google_iam_policy" "storage_bucket_policy" {
+  binding {
+    role = "roles/storage.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.default_service_account.email}",
+    ]
+  }
+}
+
+resource "google_storage_bucket_iam_policy" "storage_bucket_iam_policy" {
+  bucket      = google_storage_bucket.storage_bucket.name
+  policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
 }
 
 # gsutil mb -p duckhome-firebase -c STANDARD -l southamerica-east1 gs://duckhome-pps-terraform-state
