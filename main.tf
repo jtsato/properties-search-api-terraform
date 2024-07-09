@@ -37,10 +37,6 @@ resource "google_cloud_run_v2_service" "default" {
         value = var.meilisearch_env
       }
       env {
-        name  = "BUCKET_NAME"
-        value = var.bucket_name
-      }
-      env {
         name  = "MEILI_DB_PATH"
         value = "gs://${var.bucket_name}/data.ms"
       }
