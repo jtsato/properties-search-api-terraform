@@ -68,6 +68,7 @@ jobs:
           echo "tz=\"$TF_VAR_TZ\"" >> secrets.tfvars
 
       - name: Terraform Destroy
+        continue-on-error: true
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
