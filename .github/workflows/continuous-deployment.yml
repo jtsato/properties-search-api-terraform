@@ -36,6 +36,7 @@ jobs:
           echo "TF_VAR_MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> $GITHUB_ENV
           echo "TF_VAR_MEILISEARCH_NO_ANALYTICS=${{ secrets.MEILISEARCH_NO_ANALYTICS }}" >> $GITHUB_ENV
           echo "TF_VAR_MEILISEARCH_ENV=${{ secrets.MEILISEARCH_ENV }}" >> $GITHUB_ENV
+          echo "TF_VAR_BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> $GITHUB_ENV
           echo "TF_VAR_TZ=${{ vars.TZ }}" >> $GITHUB_ENV
 
       - name: Terraform Version
@@ -65,6 +66,7 @@ jobs:
           echo "meilisearch_master_key=\"$TF_VAR_MEILISEARCH_MASTER_KEY\"" >> secrets.tfvars
           echo "meilisearch_no_analytics=\"$TF_VAR_MEILISEARCH_NO_ANALYTICS\"" >> secrets.tfvars
           echo "meilisearch_env=\"$TF_VAR_MEILISEARCH_ENV\"" >> secrets.tfvars
+          echo "bucket_name=\"$TF_VAR_BUCKET_NAME\"" >> secrets.tfvars
           echo "tz=\"$TF_VAR_TZ\"" >> secrets.tfvars
 
       - name: Terraform Destroy
