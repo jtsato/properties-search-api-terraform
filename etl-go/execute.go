@@ -68,17 +68,20 @@ func execute() {
 		log.Fatalf("Error waiting for deleting documents: %v", err)
 	}
 
-	task, err = meiliClient.CreateIndex(&meilisearch.IndexConfig{
-		Uid:        "properties",
-		PrimaryKey: "uuid",
-	})
+	_, err = meiliClient.GetIndex("properties")
 	if err != nil {
-		log.Fatalf("Error creating index in MeiliSearch: %v", err)
-	}
+		task, err = meiliClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        "properties",
+			PrimaryKey: "uuid",
+		})
+		if err != nil {
+			log.Fatalf("Error creating index in MeiliSearch: %v", err)
+		}
 
-	err = waitForTaskCompletion(meiliClient, task.TaskUID, 5*time.Second)
-	if err != nil {
-		log.Fatalf("Error waiting for creating index: %v", err)
+		err = waitForTaskCompletion(meiliClient, task.TaskUID, 5*time.Second)
+		if err != nil {
+			log.Fatalf("Error waiting for creating index: %v", err)
+		}
 	}
 
 	task, err = meiliClient.Index("properties").AddDocuments(properties, "uuid")

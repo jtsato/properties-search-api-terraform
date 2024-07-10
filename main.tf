@@ -51,7 +51,11 @@ resource "google_cloud_run_v2_service" "default" {
       }
       volume_mounts {
         name       = "meili-data"
-        mount_path = "/meili_data/data.ms"
+        mount_path = "/meili_data"
+      }
+      volume_mounts {
+        name       = "tmp"
+        mount_path = "/tmp"
       }
     }
 
@@ -59,6 +63,13 @@ resource "google_cloud_run_v2_service" "default" {
       name = "meili-data"
       gcs {
         bucket = var.bucket_name
+        read_only = false
+      }
+    }
+    volumes {
+      name = "tmp"
+      gcs {
+        bucket = "duckhome-pps-search-bucket-tmp"
         read_only = false
       }
     }
@@ -119,12 +130,6 @@ resource "google_cloud_run_v2_service_iam_policy" "noauth" {
   policy_data = data.google_iam_policy.noauth.policy_data
 }
 
-resource "google_storage_bucket" "storage_bucket" {
-  name     = var.bucket_name
-  location = var.cloud_region
-  project  = var.project_id
-}
-
 data "google_iam_policy" "storage_bucket_policy" {
   binding {
     role = "roles/storage.admin"
@@ -135,8 +140,27 @@ data "google_iam_policy" "storage_bucket_policy" {
   }
 }
 
+resource "google_storage_bucket" "storage_bucket" {
+  name     = var.bucket_name
+  location = var.cloud_region
+  project  = var.project_id
+  force_destroy = true
+}
+
 resource "google_storage_bucket_iam_policy" "storage_bucket_iam_policy" {
   bucket      = google_storage_bucket.storage_bucket.name
+  policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
+}
+
+resource "google_storage_bucket" "storage_bucket_tmp" {
+  name     = "duckhome-pps-search-bucket-tmp"
+  location = var.cloud_region
+  project  = var.project_id
+  force_destroy = true
+}
+
+resource "google_storage_bucket_iam_policy" "storage_bucket_tmp_iam_policy" {
+  bucket      = google_storage_bucket.storage_bucket_tmp.name
   policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
 }
 
