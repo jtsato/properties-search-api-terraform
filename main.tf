@@ -1,9 +1,11 @@
 resource "google_cloud_run_v2_service" "default" {
 
+  launch_stage = "BETA"
+
   depends_on = [
     google_service_account_iam_member.iam_member,
     google_service_account_iam_binding.act_as_iam,
-    google_storage_bucket_object.storage_bucket_data,
+    google_storage_bucket.storage_bucket,
   ]
 
   name     = var.service_name
@@ -23,7 +25,7 @@ resource "google_cloud_run_v2_service" "default" {
           memory = "1024Mi"
           cpu    = "2"
         }
-        cpu_idle = true
+        cpu_idle          = true
         startup_cpu_boost = true
       }
 
@@ -41,7 +43,7 @@ resource "google_cloud_run_v2_service" "default" {
       }
       env {
         name  = "MEILI_DB_PATH"
-        value = google_storage_bucket_object.storage_bucket_data.source
+        value = "data.ms"
       }
       env {
         name  = "TZ"
@@ -49,7 +51,15 @@ resource "google_cloud_run_v2_service" "default" {
       }
       volume_mounts {
         name       = "meili-data"
-        mount_path = "/meili"
+        mount_path = "/meili_data/data.ms"
+      }
+    }
+
+    volumes {
+      name = "meili-data"
+      gcs {
+        bucket = var.bucket_name
+        read_only = false
       }
     }
 
@@ -65,7 +75,6 @@ resource "google_cloud_run_v2_service" "default" {
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
     percent = 100
   }
-
 }
 
 data "google_project" "project" {
@@ -112,7 +121,7 @@ resource "google_cloud_run_v2_service_iam_policy" "noauth" {
 
 resource "google_storage_bucket" "storage_bucket" {
   name     = var.bucket_name
-  location = google_cloud_run_v2_service.default.location
+  location = var.cloud_region
   project  = var.project_id
 }
 
@@ -131,16 +140,16 @@ resource "google_storage_bucket_iam_policy" "storage_bucket_iam_policy" {
   policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
 }
 
-resource "google_storage_bucket_object" "storage_bucket_data" {
-  name   = "data.ms"
-  bucket = var.bucket_name
-  source = "meili/data.ms"
-}
+# resource "google_storage_bucket_object" "storage_bucket_data" {
+#   name   = "data.ms"
+#   bucket = var.bucket_name
+#   source = "data.ms"
+# }
 
-resource "google_storage_bucket_acl" "storage_bucket_acl" {
-  bucket = google_storage_bucket.storage_bucket.name
-  predefined_acl = "private"
-}
+# resource "google_storage_bucket_acl" "storage_bucket_acl" {
+#   bucket         = google_storage_bucket.storage_bucket.name
+#   predefined_acl = "private"
+# }
 
 # gsutil mb -p duckhome-firebase -c STANDARD -l southamerica-east1 gs://duckhome-pps-terraform-state
 terraform {
