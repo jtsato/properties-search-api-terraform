@@ -63,7 +63,7 @@ func execute() {
 		log.Fatalf("Error deleting documents from MeiliSearch: %v", err)
 	}
 
-	err = waitForTaskCompletion(meiliClient, task.TaskUID, 5*time.Second)
+	err = waitForTaskCompletion(meiliClient, task.TaskUID, 30*time.Second)
 	if err != nil {
 		log.Fatalf("Error waiting for deleting documents: %v", err)
 	}
@@ -78,7 +78,7 @@ func execute() {
 			log.Fatalf("Error creating index in MeiliSearch: %v", err)
 		}
 
-		err = waitForTaskCompletion(meiliClient, task.TaskUID, 5*time.Second)
+		err = waitForTaskCompletion(meiliClient, task.TaskUID, 30*time.Second)
 		if err != nil {
 			log.Fatalf("Error waiting for creating index: %v", err)
 		}
@@ -89,7 +89,7 @@ func execute() {
 		log.Fatalf("Error adding documents to MeiliSearch: %v", err)
 	}
 
-	err = waitForTaskCompletion(meiliClient, task.TaskUID, 5*time.Second)
+	err = waitForTaskCompletion(meiliClient, task.TaskUID, 30*time.Second)
 	if err != nil {
 		log.Fatalf("Error waiting for adding documents: %v", err)
 	}
