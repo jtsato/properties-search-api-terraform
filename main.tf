@@ -43,7 +43,7 @@ resource "google_cloud_run_v2_service" "default" {
       }
       env {
         name  = "MEILI_DB_PATH"
-        value = "/meili_data"
+        value = "meili_data"
       }
       env {
         name  = "TZ"
