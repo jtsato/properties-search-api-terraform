@@ -14,6 +14,4 @@ func main() {
 	}
 
 	setupFiltersAndSort()
-
-	execute()
 }

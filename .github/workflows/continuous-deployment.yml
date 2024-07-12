@@ -32,11 +32,13 @@ jobs:
           echo "TF_VAR_CLOUD_REGION=${{ vars.CLOUD_REGION }}" >> $GITHUB_ENV
           echo "TF_VAR_ZONE=${{ vars.ZONE }}" >> $GITHUB_ENV
           echo "TF_VAR_SERVICE_NAME=${{ vars.SERVICE_NAME }}" >> $GITHUB_ENV
-          echo "TF_VAR_IMAGE_URL=${{ vars.IMAGE_URL }}" >> $GITHUB_ENV
+          echo "TF_VAR_MEILISEARCH_IMAGE_URL=${{ vars.MEILISEARCH_IMAGE_URL }}" >> $GITHUB_ENV
+          echo "TF_VAR_MEILISYNC_IMAGE_URL=${{ vars.MEILISYNC_IMAGE_URL }}" >> $GITHUB_ENV
           echo "TF_VAR_MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> $GITHUB_ENV
           echo "TF_VAR_MEILISEARCH_NO_ANALYTICS=${{ secrets.MEILISEARCH_NO_ANALYTICS }}" >> $GITHUB_ENV
           echo "TF_VAR_MEILISEARCH_ENV=${{ secrets.MEILISEARCH_ENV }}" >> $GITHUB_ENV
-          echo "TF_VAR_BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> $GITHUB_ENV
+          echo "TF_VAR_MEILISEARCH_BUCKET_NAME=${{ secrets.MEILISEARCH_BUCKET_NAME }}" >> $GITHUB_ENV
+          echo "TF_VAR_MEILISYNC_BUCKET_NAME=${{ secrets.MEILISYNC_BUCKET_NAME }}" >> $GITHUB_ENV
           echo "TF_VAR_TZ=${{ vars.TZ }}" >> $GITHUB_ENV
 
       - name: Terraform Version
@@ -61,12 +63,14 @@ jobs:
           echo "cloud_region=\"$TF_VAR_CLOUD_REGION\"" >> secrets.tfvars
           echo "zone=\"$TF_VAR_ZONE\"" >> secrets.tfvars
           echo "service_name=\"$TF_VAR_SERVICE_NAME\"" >> secrets.tfvars
-          echo "image_url=\"$TF_VAR_IMAGE_URL\"" >> secrets.tfvars
+          echo "meilisearch_image_url=\"$TF_VAR_MEILISEARCH_IMAGE_URL\"" >> secrets.tfvars
+          echo "meilisync_image_url=\"$TF_VAR_MEILISYNC_IMAGE_URL\"" >> secrets.tfvars
           echo "meilisearch_host=\"$TF_VAR_MEILISEARCH_HOST\"" >> secrets.tfvars
           echo "meilisearch_master_key=\"$TF_VAR_MEILISEARCH_MASTER_KEY\"" >> secrets.tfvars
           echo "meilisearch_no_analytics=\"$TF_VAR_MEILISEARCH_NO_ANALYTICS\"" >> secrets.tfvars
           echo "meilisearch_env=\"$TF_VAR_MEILISEARCH_ENV\"" >> secrets.tfvars
-          echo "bucket_name=\"$TF_VAR_BUCKET_NAME\"" >> secrets.tfvars
+          echo "meilisearch_bucket_name=\"$TF_VAR_MEILISEARCH_BUCKET_NAME\"" >> secrets.tfvars
+          echo "meilisync_bucket_name=\"$TF_VAR_MEILISYNC_BUCKET_NAME\"" >> secrets.tfvars
           echo "tz=\"$TF_VAR_TZ\"" >> secrets.tfvars
 
       - name: Terraform Destroy

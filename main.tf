@@ -5,7 +5,8 @@ resource "google_cloud_run_v2_service" "default" {
   depends_on = [
     google_service_account_iam_member.iam_member,
     google_service_account_iam_binding.act_as_iam,
-    google_storage_bucket.storage_bucket,
+    google_storage_bucket.meilisearch_storage_bucket,
+    google_storage_bucket.meilisync_storage_bucket,
   ]
 
   name     = var.service_name
@@ -14,7 +15,7 @@ resource "google_cloud_run_v2_service" "default" {
 
   template {
     containers {
-      image = var.image_url
+      image = var.meilisearch_image_url
 
       ports {
         container_port = 7700
@@ -49,16 +50,32 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "TZ"
         value = var.tz
       }
+
       volume_mounts {
         name       = "meili-data"
         mount_path = "/meili_data"
       }
+      volume_mounts {
+        name       = "meilisync"
+        mount_path = "/meilisync"
+      }
+    }
+
+    containers {
+      image = var.meilisync_image_url
     }
 
     volumes {
       name = "meili-data"
       gcs {
-        bucket = var.bucket_name
+        bucket    = var.meilisearch_bucket_name
+        read_only = false
+      }
+    }
+    volumes {
+      name = "meilisync"
+      gcs {
+        bucket    = var.meilisync_bucket_name
         read_only = false
       }
     }
@@ -129,28 +146,29 @@ data "google_iam_policy" "storage_bucket_policy" {
   }
 }
 
-resource "google_storage_bucket" "storage_bucket" {
-  name     = var.bucket_name
-  location = var.cloud_region
-  project  = var.project_id
+resource "google_storage_bucket" "meilisearch_storage_bucket" {
+  name          = var.meilisearch_bucket_name
+  location      = var.cloud_region
+  project       = var.project_id
   force_destroy = true
 }
 
-resource "google_storage_bucket_iam_policy" "storage_bucket_iam_policy" {
-  bucket      = google_storage_bucket.storage_bucket.name
+resource "google_storage_bucket_iam_policy" "meilisearch_storage_bucket_iam_policy" {
+  bucket      = google_storage_bucket.meilisearch_storage_bucket.name
   policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
 }
 
-# resource "google_storage_bucket_object" "storage_bucket_data" {
-#   name   = "data.ms"
-#   bucket = var.bucket_name
-#   source = "data.ms"
-# }
+resource "google_storage_bucket" "meilisync_storage_bucket" {
+  name          = var.meilisync_bucket_name
+  location      = var.cloud_region
+  project       = var.project_id
+  force_destroy = true
+}
 
-# resource "google_storage_bucket_acl" "storage_bucket_acl" {
-#   bucket         = google_storage_bucket.storage_bucket.name
-#   predefined_acl = "private"
-# }
+resource "google_storage_bucket_iam_policy" "meilisync_storage_bucket_iam_policy" {
+  bucket      = google_storage_bucket.meilisync_storage_bucket.name
+  policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
+}
 
 # gsutil mb -p duckhome-firebase -c STANDARD -l southamerica-east1 gs://duckhome-pps-terraform-state
 terraform {

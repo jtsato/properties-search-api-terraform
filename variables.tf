@@ -18,8 +18,13 @@ variable "service_name" {
   type        = string
 }
 
-variable "image_url" {
-  description = "URL of the Docker image to deploy."
+variable "meilisearch_image_url" {
+  description = "URL of the MeiliSearch Docker image to deploy."
+  type        = string
+}
+
+variable "meilisync_image_url" {
+  description = "URL of the MeiliSync Docker image to deploy."
   type        = string
 }
 
@@ -43,8 +48,13 @@ variable "meilisearch_env" {
   type        = string
 }
 
-variable "bucket_name" {
-  description = "Bucket name."
+variable "meilisearch_bucket_name" {
+  description = "MeiliSearch bucket name."
+  type        = string
+}
+
+variable "meilisync_bucket_name" {
+  description = "MeiliSync bucket name."
   type        = string
 }
 

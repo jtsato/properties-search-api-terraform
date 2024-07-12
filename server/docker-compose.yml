@@ -24,6 +24,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  meilisync:
+    image: long2ice/meilisync
+    volumes:
+      - ./config.yml:/meilisync/config.yml
+    restart: always
+    networks:
+      - meilisearch
+    depends_on:
+      meilisearch:
+        condition: service_healthy
+        restart: true
     
 networks:
   meilisearch:

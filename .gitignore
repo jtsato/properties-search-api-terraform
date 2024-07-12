@@ -39,3 +39,5 @@ terraform.rc
 *.tfstate.backup
 secrets.tfvars
 tfplan.out
+server/data.ms/*
+server/config.yml
