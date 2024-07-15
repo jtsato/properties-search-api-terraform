@@ -40,10 +40,12 @@ changes = {
         'container_name': service_name,
         'image': meilisearch_image_url,
         'environment': {
-            'MEILISEARCH_HOST': meilisearch_host,
-            'MEILISEARCH_MASTER_KEY': meilisearch_master_key,
-            'MEILISEARCH_NO_ANALYTICS': meilisearch_no_analytics,
-            'MEILISEARCH_ENV': meilisearch_env,
+            'MEILI_HOST': meilisearch_host,
+            'MEILI_MASTER_KEY': meilisearch_master_key,
+            'MEILI_NO_ANALYTICS': meilisearch_no_analytics,
+            'MEILI_ENV': meilisearch_env,
+            'MEILI_LOG_LEVEL': 'INFO',
+            'MEILI_DB_PATH': '/data.ms',
             'TZ': 'America/Sao_Paulo'
         },
         'ports': [
