@@ -48,10 +48,11 @@ jobs:
         run: |
           echo "SERVICE_NAME=${{ vars.SERVICE_NAME }}" >> $GITHUB_ENV
           echo "MEILISEARCH_IMAGE_URL=${{ vars.MEILISEARCH_IMAGE_URL }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> $GITHUB_ENV
           echo "MEILISEARCH_HOST=${{ secrets.MEILISEARCH_HOST }}" >> $GITHUB_ENV
           echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> $GITHUB_ENV
-          echo "MEILISEARCH_NO_ANALYTICS=${{ vars.MEILISEARCH_NO_ANALYTICS }}" >> $GITHUB_ENV
           echo "MEILISEARCH_ENV=${{ vars.MEILISEARCH_ENV }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_NO_ANALYTICS=${{ vars.MEILISEARCH_NO_ANALYTICS }}" >> $GITHUB_ENV
 
       - name: Create Docker Compose File
         working-directory: vps-services
