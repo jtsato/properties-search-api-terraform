@@ -1,0 +1,91 @@
+name: Continuous Deployment to VPS [Infra-Linux]
+
+on:
+  push:
+    branches:
+      - "**"
+    paths: 
+      - ".github/workflows/continuous-deployment-vps-linux.yml"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+concurrency:
+  group: "continuous-deployment-vps"
+  cancel-in-progress: false
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Set Environment Variables from GitHub Secrets
+        run: |
+          echo "TF_LOG=debug" >> $GITHUB_ENV
+          echo "TF_VAR_SSH_USER=${{ secrets.SSH_USER }}" >> $GITHUB_ENV
+          echo "TF_VAR_SSH_PASSWORD=${{ secrets.SSH_PASSWORD }}" >> $GITHUB_ENV
+          echo "TF_VAR_SSH_HOST=${{ secrets.SSH_HOST }}" >> $GITHUB_ENV
+          echo "TF_VAR_SSH_PORT=${{ secrets.SSH_PORT }}" >> $GITHUB_ENV
+
+      - name: Terraform Version
+        run: terraform -version
+
+      - name: Terraform Init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: terraform init
+
+      - name: Terraform validate
+        run: |
+          terraform validate
+
+      - name: Verify Terraform Providers
+        run: |
+          terraform providers lock -platform=windows_amd64 -platform=darwin_amd64 -platform=linux_amd64 -platform=darwin_arm64 -platform=linux_arm64
+
+      - name: Create secrets.tfvars
+        run: |
+          echo "ssh_user=\"$TF_VAR_SSH_USER\"" >> secrets.tfvars
+          echo "ssh_password=\"$TF_VAR_SSH_PASSWORD\"" >> secrets.tfvars
+          echo "ssh_host=\"$TF_VAR_SSH_HOST\"" >> secrets.tfvars
+          echo "ssh_port=\"$TF_VAR_SSH_PORT\"" >> secrets.tfvars
+
+      - name: Terraform Destroy
+        continue-on-error: true
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          terraform destroy -auto-approve -var-file=secrets.tfvars
+
+      - name: Terraform Refresh
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          terraform refresh -var-file=secrets.tfvars
+
+      - name: Terraform State List
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          terraform state list
+
+      - name: Terraform Plan
+        id: plan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          terraform plan -out=tfplan.out -var-file=secrets.tfvars
+
+      - name: Terraform Apply
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          terraform apply -auto-approve tfplan.out

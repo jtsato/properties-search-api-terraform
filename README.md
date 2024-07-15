@@ -21,9 +21,3 @@ Properties Search API IaC project.
 * Storage Admin
 
 ***
-
-## TODO:
-* [X] CI Pipeline (Build Go Binary Files)
-* [X] CD Pipeline (Terraform Apply on GCP)
-* [X] Setup Secrets in GitHub Secrets
-* [ ] Setup Meilisearch Volume in GCS (Google Cloud Storage)

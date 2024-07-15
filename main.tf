@@ -1,173 +1,24 @@
-resource "google_cloud_run_v2_service" "default" {
+resource "null_resource" "app_server" {
 
-  launch_stage = "BETA"
-
-  depends_on = [
-    google_service_account_iam_member.iam_member,
-    google_service_account_iam_binding.act_as_iam,
-    google_storage_bucket.meilisearch_storage_bucket,
-    google_storage_bucket.meilisync_storage_bucket,
-  ]
-
-  name     = var.service_name
-  location = var.cloud_region
-  project  = var.project_id
-
-  template {
-    containers {
-      image = var.meilisearch_image_url
-
-      ports {
-        container_port = 7700
-      }
-
-      resources {
-        limits = {
-          memory = "1024Mi"
-          cpu    = "2"
-        }
-        cpu_idle          = true
-        startup_cpu_boost = true
-      }
-
-      env {
-        name  = "MEILI_MASTER_KEY"
-        value = var.meilisearch_master_key
-      }
-      env {
-        name  = "MEILI_NO_ANALYTICS"
-        value = var.meilisearch_no_analytics
-      }
-      env {
-        name  = "MEILI_ENV"
-        value = var.meilisearch_env
-      }
-      env {
-        name  = "MEILI_DB_PATH"
-        value = "meili_data"
-      }
-      env {
-        name  = "TZ"
-        value = var.tz
-      }
-
-      volume_mounts {
-        name       = "meili-data"
-        mount_path = "/meili_data"
-      }
-      volume_mounts {
-        name       = "meilisync"
-        mount_path = "/meilisync"
-      }
-    }
-
-    containers {
-      image = var.meilisync_image_url
-    }
-
-    volumes {
-      name = "meili-data"
-      gcs {
-        bucket    = var.meilisearch_bucket_name
-        read_only = false
-      }
-    }
-    volumes {
-      name = "meilisync"
-      gcs {
-        bucket    = var.meilisync_bucket_name
-        read_only = false
-      }
-    }
-
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 1
-    }
-
-    service_account = var.service_name
+  connection {
+    type     = "ssh"
+    user     = var.ssh_user
+    password = var.ssh_password
+    host     = var.ssh_host
+    port     = var.ssh_port
   }
 
-  traffic {
-    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
-    percent = 100
+  provisioner "file" {
+    source      = "install-docker.sh"
+    destination = "/tmp/install-docker.sh"
   }
-}
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
-resource "google_service_account" "default_service_account" {
-  account_id   = var.service_name
-  display_name = var.service_name
-  project      = data.google_project.project.project_id
-}
-
-resource "google_service_account_iam_binding" "act_as_iam" {
-  service_account_id = google_service_account.default_service_account.name
-  role               = "roles/iam.serviceAccountUser"
-  members = [
-    "serviceAccount:${google_service_account.default_service_account.email}",
-  ]
-}
-
-resource "google_service_account_iam_member" "iam_member" {
-  service_account_id = google_service_account.default_service_account.name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${google_service_account.default_service_account.email}"
-}
-
-data "google_iam_policy" "noauth" {
-  binding {
-    role = "roles/run.invoker"
-
-    members = [
-      "allUsers",
+  provisioner "remote-exec" {
+    inline = [
+      "echo ${var.ssh_password} | sudo -S chmod +x /tmp/install-docker.sh",
+      "echo ${var.ssh_password} | sudo -S /tmp/install-docker.sh",
     ]
   }
-}
-
-resource "google_cloud_run_v2_service_iam_policy" "noauth" {
-  project  = google_cloud_run_v2_service.default.project
-  location = google_cloud_run_v2_service.default.location
-  name     = google_cloud_run_v2_service.default.name
-
-  policy_data = data.google_iam_policy.noauth.policy_data
-}
-
-data "google_iam_policy" "storage_bucket_policy" {
-  binding {
-    role = "roles/storage.admin"
-
-    members = [
-      "serviceAccount:${google_service_account.default_service_account.email}",
-    ]
-  }
-}
-
-resource "google_storage_bucket" "meilisearch_storage_bucket" {
-  name          = var.meilisearch_bucket_name
-  location      = var.cloud_region
-  project       = var.project_id
-  force_destroy = true
-}
-
-resource "google_storage_bucket_iam_policy" "meilisearch_storage_bucket_iam_policy" {
-  bucket      = google_storage_bucket.meilisearch_storage_bucket.name
-  policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
-}
-
-resource "google_storage_bucket" "meilisync_storage_bucket" {
-  name          = var.meilisync_bucket_name
-  location      = var.cloud_region
-  project       = var.project_id
-  force_destroy = true
-}
-
-resource "google_storage_bucket_iam_policy" "meilisync_storage_bucket_iam_policy" {
-  bucket      = google_storage_bucket.meilisync_storage_bucket.name
-  policy_data = data.google_iam_policy.storage_bucket_policy.policy_data
 }
 
 # gsutil mb -p duckhome-firebase -c STANDARD -l southamerica-east1 gs://duckhome-pps-terraform-state

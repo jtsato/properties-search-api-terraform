@@ -1,0 +1,111 @@
+name: Continuous Deployment to VPS [Service-Linux]
+
+on:
+  push:
+    branches:
+      - "**"
+    paths: 
+      - "vps-services/**"
+      - ".github/workflows/continuous-deployment-service-linux.yml"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+concurrency:
+  group: "continuous-deployment-service"
+  cancel-in-progress: false        
+
+jobs:
+  deploy-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt update && sudo apt install -y sshpass        
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}      
+
+      - name: Get the microservice version from README.md
+        id: version
+        run: |
+          echo "PRP_PRD=$(cat README.md | grep -o -P '(?<=<!-- etl-prd-start -->).*(?=<!-- etl-prd-end -->)')" >> $GITHUB_ENV
+
+      - name: Build Image URL
+        id: build_image_url
+        run: |
+          echo "IMAGE_URL=${{ vars.DOCKER_REGISTRY }}/jtsato/${{ vars.ARTIFACT_NAME }}:${{ env.PRP_PRD }}" >> $GITHUB_ENV
+
+      - name: Set Environment Variables from GitHub Secrets
+        env:
+          IMAGE_URL: ${{ env.IMAGE_URL }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          echo "SERVICE_NAME=${{ vars.SERVICE_NAME }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_IMAGE_URL=${{ vars.MEILISEARCH_IMAGE_URL }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_HOST=${{ secrets.MEILISEARCH_HOST }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_MASTER_KEY=${{ secrets.MEILISEARCH_MASTER_KEY }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_NO_ANALYTICS=${{ vars.MEILISEARCH_NO_ANALYTICS }}" >> $GITHUB_ENV
+          echo "MEILISEARCH_ENV=${{ vars.MEILISEARCH_ENV }}" >> $GITHUB_ENV
+
+      - name: Create Docker Compose File
+        working-directory: vps-services
+        id: create-docker-compose
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          python create-docker-compose.py
+
+      - name: Create directory on remote server
+        working-directory: vps-services
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }}"
+
+      - name: Copy docker-compose.yml to remote server
+        working-directory: vps-services
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }}/docker-compose.yml
+
+      - name: Copy Google Credentials to remote server
+        working-directory: vps-services
+        run: |
+          echo ${{ secrets.GOOGLE_CREDENTIALS_64 }} | base64 --decode > google-credentials.json
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no google-credentials.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }}/google-credentials.json
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }}/google-credentials.json"
+
+      - name: Bring down docker-compose services
+        working-directory: vps-services
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }} && docker compose down"
+
+      - name: Bring up docker-compose services
+        working-directory: vps-services
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }} && docker compose up -d"
+
+      - name: Check docker-compose services status
+        working-directory: vps-services
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /home/${{ secrets.SSH_USER }}/${{ vars.SERVICE_NAME }} && docker ps"
+
+      - name: Environment Teardown
+        if: always()
+        run: |
+          echo "Finished!"
+
+  etl-go:
+    needs: deploy-service
+    uses: ./.github/workflows/extract-transform-load.yml
+    secrets:
+      meilisearch_host: ${{ secrets.MEILISEARCH_HOST }}
+      meilisearch_master_key: ${{ secrets.MEILISEARCH_MASTER_KEY }}
+      mongodb_url: ${{ secrets.MONGODB_URL }}
+      mongodb_database: ${{ secrets.MONGODB_DATABASE }}
+      mongodb_user: ${{ secrets.MONGODB_USER }}
+      mongodb_password: ${{ secrets.MONGODB_PASSWORD }}
+      personal_access_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
