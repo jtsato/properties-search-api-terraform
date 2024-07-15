@@ -47,10 +47,6 @@ jobs:
         run: |
           terraform validate
 
-      - name: Verify Terraform Providers
-        run: |
-          terraform providers lock -platform=windows_amd64 -platform=darwin_amd64 -platform=linux_amd64 -platform=darwin_arm64 -platform=linux_arm64
-
       - name: Create secrets.tfvars
         run: |
           echo "ssh_user=\"$TF_VAR_SSH_USER\"" >> secrets.tfvars
